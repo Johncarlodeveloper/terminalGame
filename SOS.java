@@ -1,1408 +1,187 @@
 import java.util.Scanner;
 
-public class SOS {
+class mechanics {
+    String playerName, letterChoice;
+    int row, column, numChoice, playerScore;
+    static int grids;
+    static String[][] table;
+
+    void trackRowColumn() {
+        int count = 1;
+        for (int i = 2; i < grids - 2; i++) {
+            for (int j = 2; j < grids - 2; j++) {
+                if (numChoice == count) {
+                    row = i;
+                    column = j;
+                }
+                count++;
+            }
+        }
+    }
+
+    void swap() {
+        table[row][column] = letterChoice;
+    }
+
+    void check_match() {
+        if (letterChoice.equals("O ")) {
+            if (table[row][column - 1].equals("S ") && table[row][column - 1].equals(table[row][column + 1])) {
+                playerScore++;
+            }
+            if (table[row - 1][column].equals("S ") && table[row - 1][column].equals(table[row + 1][column])) {
+                playerScore++;
+            }
+            if (table[row - 1][column - 1].equals("S ")
+                    && table[row - 1][column - 1].equals(table[row + 1][column + 1])) {
+                playerScore++;
+            }
+            if (table[row - 1][column + 1].equals("S ")
+                    && table[row - 1][column + 1].equals(table[row + 1][column - 1])) {
+                playerScore++;
+            }
+
+        } else if (letterChoice.equals("S ")) {
+            if (table[row - 2][column - 2].equals("S ") && table[row - 1][column - 1].equals("O ")) {
+                playerScore++;
+            }
+            if (table[row - 2][column].equals("S ") && table[row - 1][column].equals("O ")) {
+                playerScore++;
+            }
+            if (table[row - 2][column + 2].equals("S ") && table[row - 1][column + 1].equals("O ")) {
+                playerScore++;
+            }
+            if (table[row][column - 2].equals("S ") && table[row][column - 1].equals("O ")) {
+                playerScore++;
+            }
+            if (table[row][column + 2].equals("S ") && table[row][column + 1].equals("O ")) {
+                playerScore++;
+            }
+            if (table[row + 2][column - 2].equals("S ") && table[row + 2][column - 1].equals("O ")) {
+                playerScore++;
+            }
+            if (table[row - 2][column].equals("S ") && table[row][column - 1].equals("O ")) {
+                playerScore++;
+            }
+            if (table[row + 2][column + 2].equals("S ") && table[row + 1][column + 1].equals("O ")) {
+                playerScore++;
+            }
+        }
+    }
+}
+
+public class playSOS {
     public static Scanner sc = new Scanner(System.in);
-    public static String[][] nums = { { "01", "02", "03", "04", "05" }, { "06", "07", "08", "09", "10" },
-            { "11", "12", "13", "14", "15" },
-            { "16", "17", "18", "19", "20" }, { "21", "22", "23", "24", "25" } };
-    public static boolean[][] places = { { false, false, false, false, false }, { false, false, false, false, false },
-            { false, false, false, false, false }, { false, false, false, false, false },
-            { false, false, false, false, false } };
-    public static String xName;
-    public static String yName;
-    public static int xScore = 0;
-    public static int yScore = 0;
-    public static int chosenTurn = 0; // zero for player X and 1 for player Y
-    public static String numChoice = "x";
-    public static String letterChoice;
-    public static int flagX = 0;
-    public static int flagY = 0;
-    public static int endFlag = 1;
-    public static int count = 0;
+    public static int game_over = 0;
+    public static int x = 0;
 
     public static void main(String[] args) {
-        System.out.print("X player's name --->: ");
-        xName = sc.nextLine();
-        System.out.print("Y player's name --->: ");
-        yName = sc.nextLine();
+        String end;
+        do {
+            mechanics playerOne = new mechanics(); // create an object for player one
+            System.out.print("Player 1's name --->: "); // ask player 1's name
+            playerOne.playerName = sc.nextLine(); // reference object to instance variable playerName
+            mechanics playerTwo = new mechanics();// create an object for player two
+            System.out.print("Player 2's name --->: "); // ask player 2's name
+            playerTwo.playerName = sc.nextLine(); // reference object to instance variable playerName
+            System.out.print("Grid choice: "); // ask grid choice
+            mechanics.grids = sc.nextInt(); // update grids number
+            mechanics.grids += 4; // add shadow cells
+            initialize_table(playerOne, playerTwo); // create the table
+            print_table(playerOne, playerTwo); // print the un shadowed table
+            while (x != 1) { // play the game until there is no cells left to pick
+                ask_user(playerOne, playerTwo); // call ask_user method
+            }
+            if (playerOne.playerScore > playerTwo.playerScore) { // determine the winner depending on the scores
+                System.out.println(playerOne.playerName + " wins!");
+            } else if (playerTwo.playerScore > playerOne.playerScore) {
+                System.out.println(playerTwo.playerName + " wins!");
+            } else {
+                System.out.println("It's a tie!");
+            }
+            System.out.print("Play Again? -->[y/n]: "); // play again option
+            end = sc.nextLine();
+            if (end.equals("y")) {
+                playerOne.playerScore = playerTwo.playerScore = x = game_over = 0;
+            }
+        } while (end.equals("y")); // repeat game if responded yes
 
+    }
+
+    public static void initialize_table(mechanics playerOne, mechanics playerTwo) { // object parameters
+        mechanics.table = new String[mechanics.grids][mechanics.grids]; // memory allocation for 2d array
+        int nums = 1;
+        for (int i = 0; i < mechanics.grids; i++) {
+            String strnum = " ";
+            for (int j = 0; j < mechanics.grids; j++) {
+                if ((i >= 2 && i < mechanics.grids - 2) && (j >= 2 && j < mechanics.grids - 2)) {
+                    if (nums < 10) {
+                        strnum = Integer.toString(nums);
+                        mechanics.table[i][j] = "0" + strnum;
+                    } else {
+                        strnum = Integer.toString(nums);
+                        mechanics.table[i][j] = strnum;
+                    }
+                    nums++;
+                } else {
+                    mechanics.table[i][j] = "X ";
+                }
+
+            }
+        }
+    }
+
+    public static void print_table(mechanics playerOne, mechanics playerTwo) {
         System.out.println();
-        welcome();
+        for (int i = 2; i < mechanics.grids - 2; i++) {
+            for (int j = 2; j < mechanics.grids - 2; j++) {
+                System.out.print(" " + mechanics.table[i][j] + " ");
+            }
+            System.out.println("\n");
+        }
         System.out.println();
-
-        printTable();
-
-        System.out.println();
-        while (count < 25) {
-
-            xTurn();
-            System.out.println();
-            yTurn();
-        }
-
-        System.out.println(xName + " got " + xScore + "!");
-        System.out.println(yName + " got " + yScore + "!");
-
-        System.out.println();
-        if (xScore > yScore) {
-            System.out.println(xName + " wins!");
-        } else if (yScore > xScore) {
-            System.out.println(yName + " wins!");
-        } else {
-            System.out.println("It's a tie.");
-        }
-
     }
 
-    public static void printtruefalse() {
-        for (int i = 0; i < places.length; i++) {
-            for (int j = 0; j < places[0].length; j++) {
-                System.out.println(places[i][j] + " ");
+    public static void ask_user(mechanics playerOne, mechanics playerTwo) {
+        int score1;
+        do {
+            if (game_over == (mechanics.grids - 4) * (mechanics.grids - 4)) {
+                x = 1;
+                return;
+            } // check if there is no cells left to pick by player
+            System.out.print("Pick a number " + playerOne.playerName + " -->: ");
+            playerOne.numChoice = sc.nextInt();
+            game_over++;
+            playerOne.trackRowColumn();
+            sc.nextLine();
+            System.out.println(">> Include a space after entering S/O <<");
+            System.out.print("Enter a letter-->[S/O]; ");
+            playerOne.letterChoice = sc.nextLine();
+            playerOne.swap();
+            print_table(playerOne, playerTwo);
+            score1 = playerOne.playerScore;
+            playerOne.check_match();
+            System.out.println("P1: " + playerOne.playerScore);
+        } while (score1 < playerOne.playerScore);
+
+        int score2;
+        do {
+            if (game_over == (mechanics.grids - 4) * (mechanics.grids - 4)) {
+                x = 1;
+                return;
             }
-            System.out.println();
-        }
+            System.out.print("Pick a number " + playerTwo.playerName + " -->: ");
+            playerTwo.numChoice = sc.nextInt();
+            game_over++;
+            playerTwo.trackRowColumn();
+            sc.nextLine();
+            System.out.println(">> Include a space after entering S/O <<");
+            System.out.print("Enter a letter-->[S/O]: ");
+            playerTwo.letterChoice = sc.nextLine();
+            playerTwo.swap();
+            score2 = playerTwo.playerScore;
+            print_table(playerOne, playerTwo);
+            playerTwo.check_match();
+            System.out.println("P2: " + playerTwo.playerScore);
+        } while (score2 < playerTwo.playerScore);
     }
-
-    public static void printTable() {
-        for (int i = 0; i < nums.length; i++) {
-            for (int j = 0; j < nums[0].length; j++) {
-                System.out.print(nums[i][j] + "   ");
-            }
-            System.out.println();
-            System.out.println();
-        }
-    }
-
-    public static void welcome() {
-        System.out.println("Hello " + xName + " and " + yName + ", Welcome to SOS game!");
-    }
-
-    public static void xTurn() {
-
-        while ((!(chosenTurn == 1)) && (count < 25)) {
-            System.out.println("X : " + xScore);
-            System.out.println("Y: " + yScore);
-            System.out.println("Turn: " + chosenTurn);
-            System.out.println("count: " + count);
-            do {
-                System.out.print(xName + "'s turn --->: ");
-                numChoice = sc.nextLine();
-            } while (!(checkPlace() == 0));
-
-            System.out.print(xName + "'s turn [O/S] --->: ");
-            letterChoice = sc.nextLine();
-            System.out.println();
-
-            printInside();
-
-            checkPattern();
-            printTable();
-            if (flagX == 1) {
-                chosenTurn = 1;
-                flagX = 0;
-            } else if (flagX == 0) {
-                chosenTurn = 0;
-            }
-        }
-
-    }
-
-    public static void yTurn() {
-        while ((!(chosenTurn == 0)) && (count < 25)) {
-            System.out.println("X : " + xScore);
-            System.out.println("Y: " + yScore);
-            System.out.println("Turn: " + chosenTurn);
-            System.out.println("count: " + count);
-            do {
-                System.out.print(yName + "'s turn --->: ");
-                numChoice = sc.nextLine();
-            } while (checkPlace() == 1);
-
-            System.out.print(yName + "'s turn [O/S] --->: ");
-            letterChoice = sc.nextLine();
-            System.out.println();
-
-            printInside();
-
-            checkPattern();
-            printTable();
-            if (flagY == 1) {
-                chosenTurn = 0;
-                flagY = 0;
-            } else if (flagY == 0) {
-                chosenTurn = 1;
-            }
-
-        }
-
-    }
-
-    public static int checkPlace() {
-        for (int i = 0; i < nums.length; i++) {
-            for (int j = 0; j < nums[0].length; j++) {
-                if (numChoice.equals(nums[i][j])) {
-                    if (places[i][j] == false) {
-                        return 0;
-                    }
-                }
-            }
-        }
-        return 1;
-    }
-
-    public static void printInside() {
-        if (numChoice.equals("01")) {
-            nums[0][0] = letterChoice + " ";
-            places[0][0] = true;
-            count++;
-        }
-        if (numChoice.equals("02")) {
-            nums[0][1] = letterChoice + " ";
-            places[0][1] = true;
-            count++;
-        }
-        if (numChoice.equals("03")) {
-            nums[0][2] = letterChoice + " ";
-            places[0][2] = true;
-            count++;
-        }
-        if (numChoice.equals("04")) {
-            nums[0][3] = letterChoice + " ";
-            places[0][3] = true;
-            count++;
-        }
-        if (numChoice.equals("05")) {
-            nums[0][4] = letterChoice + " ";
-            places[0][4] = true;
-            count++;
-        }
-        if (numChoice.equals("06")) {
-            nums[1][0] = letterChoice + " ";
-            places[1][0] = true;
-            count++;
-        }
-        if (numChoice.equals("07")) {
-            nums[1][1] = letterChoice + " ";
-            places[1][1] = true;
-            count++;
-        }
-        if (numChoice.equals("08")) {
-            nums[1][2] = letterChoice + " ";
-            places[1][2] = true;
-            count++;
-        }
-        if (numChoice.equals("09")) {
-            nums[1][3] = letterChoice + " ";
-            places[1][3] = true;
-            count++;
-        }
-        if (numChoice.equals("10")) {
-            nums[1][4] = letterChoice + " ";
-            places[1][4] = true;
-            count++;
-        }
-        if (numChoice.equals("11")) {
-            nums[2][0] = letterChoice + " ";
-            places[2][0] = true;
-            count++;
-        }
-        if (numChoice.equals("12")) {
-            nums[2][1] = letterChoice + " ";
-            places[2][1] = true;
-            count++;
-        }
-        if (numChoice.equals("13")) {
-            nums[2][2] = letterChoice + " ";
-            places[2][2] = true;
-            count++;
-        }
-        if (numChoice.equals("14")) {
-            nums[2][3] = letterChoice + " ";
-            places[2][3] = true;
-            count++;
-        }
-        if (numChoice.equals("15")) {
-            nums[2][4] = letterChoice + " ";
-            places[2][4] = true;
-            count++;
-        }
-        if (numChoice.equals("16")) {
-            nums[3][0] = letterChoice + " ";
-            places[3][0] = true;
-            count++;
-        }
-        if (numChoice.equals("17")) {
-            nums[3][1] = letterChoice + " ";
-            places[3][1] = true;
-            count++;
-        }
-        if (numChoice.equals("18")) {
-            nums[3][2] = letterChoice + " ";
-            places[3][2] = true;
-            count++;
-        }
-        if (numChoice.equals("19")) {
-            nums[3][3] = letterChoice + " ";
-            places[3][3] = true;
-            count++;
-        }
-        if (numChoice.equals("20")) {
-            nums[3][4] = letterChoice + " ";
-            places[3][4] = true;
-            count++;
-        }
-        if (numChoice.equals("21")) {
-            nums[4][0] = letterChoice + " ";
-            places[4][0] = true;
-            count++;
-        }
-        if (numChoice.equals("22")) {
-            nums[4][1] = letterChoice + " ";
-            places[4][1] = true;
-            count++;
-        }
-        if (numChoice.equals("23")) {
-            nums[4][2] = letterChoice + " ";
-            places[4][2] = true;
-            count++;
-        }
-        if (numChoice.equals("24")) {
-            nums[4][3] = letterChoice + " ";
-            places[4][3] = true;
-            count++;
-        }
-        if (numChoice.equals("25")) {
-            nums[4][4] = letterChoice + " ";
-            places[4][4] = true;
-            count++;
-        }
-
-    }
-
-    public static void checkPattern() {
-
-        if (chosenTurn == 0) {
-            int holdx = xScore;
-            if (letterChoice.equals("S")) {
-                if (numChoice.equals("01")) {
-                    if ((nums[0][0].equals("S ")) && (nums[0][1].equals("O ")) && (nums[0][2].equals("S "))) {
-                        xScore++;
-
-                    }
-                    if ((nums[0][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-
-                    }
-                    if ((nums[0][0].equals("S ")) && (nums[1][0].equals("O ")) && (nums[2][0].equals("S "))) {
-                        xScore++;
-                    }
-
-                }
-                if (numChoice.equals("02")) {
-                    if ((nums[0][1].equals("S ")) && (nums[0][2].equals("O ")) && (nums[0][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][1].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][1].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("03")) {
-                    if ((nums[0][2].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[0][3].equals("O ")) && (nums[0][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[0][1].equals("O ")) && (nums[0][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][0].equals("S "))) {
-                        xScore++;
-                    }
-
-                }
-                if (numChoice.equals("04")) {
-                    if ((nums[0][3].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][3].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][3].equals("S ")) && (nums[0][2].equals("O ")) && (nums[0][1].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("05")) {
-                    if ((nums[0][4].equals("S ")) && (nums[0][3].equals("O ")) && (nums[0][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][4].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][4].equals("S ")) && (nums[1][4].equals("O ")) && (nums[2][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("06")) {
-                    if ((nums[1][0].equals("S ")) && (nums[2][0].equals("O ")) && (nums[3][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[1][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("07")) {
-                    if ((nums[1][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[1][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][1].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][3].equals("S "))) {
-                        xScore++;
-                    }
-                }
-
-                if (numChoice.equals("08")) {
-                    if ((nums[1][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[1][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[1][1].equals("O ")) && (nums[1][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("09")) {
-                    if ((nums[1][3].equals("S ")) && (nums[1][2].equals("O ")) && (nums[1][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][3].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][3].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("10")) {
-                    if ((nums[1][4].equals("S ")) && (nums[2][4].equals("O ")) && (nums[3][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][4].equals("S ")) && (nums[1][3].equals("O ")) && (nums[1][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][4].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("11")) {
-                    if ((nums[2][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[0][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[1][0].equals("O ")) && (nums[0][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[3][0].equals("O ")) && (nums[4][0].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("12")) {
-                    if ((nums[2][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[0][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[1][1].equals("O ")) && (nums[0][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][3].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("13")) {
-                    if ((nums[2][2].equals("S ")) && (nums[1][1].equals("O ")) && (nums[0][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[1][2].equals("O ")) && (nums[0][2].equals("S"))) {
-                        xScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[0][4].equals("S"))) {
-                        xScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][0].equals("S"))) {
-                        xScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][2].equals("S"))) {
-                        xScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][4].equals("S"))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("14")) {
-                    if ((nums[2][3].equals("S ")) && (nums[1][3].equals("O ")) && (nums[0][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[1][2].equals("O ")) && (nums[0][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[2][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][3].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("15")) {
-                    if ((nums[2][4].equals("S ")) && (nums[1][4].equals("O ")) && (nums[0][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[1][3].equals("O ")) && (nums[0][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[2][3].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[3][4].equals("O ")) && (nums[4][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("16")) {
-                    if ((nums[3][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[1][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][0].equals("S ")) && (nums[2][0].equals("O ")) && (nums[1][0].equals("S "))) {
-                        xScore++;
-                    }
-                }
-
-                if (numChoice.equals("17")) {
-                    if ((nums[3][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[3][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[1][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][1].equals("S ")) && (nums[2][1].equals("O ")) && (nums[1][1].equals("S "))) {
-                        xScore++;
-                    }
-
-                }
-                if (numChoice.equals("18")) {
-                    if ((nums[3][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[3][1].equals("O ")) && (nums[3][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[2][2].equals("O ")) && (nums[1][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[1][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[2][1].equals("O ")) && (nums[1][0].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("19")) {
-                    if ((nums[3][3].equals("S ")) && (nums[2][3].equals("O ")) && (nums[1][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[1][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[3][1].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("19")) {
-                    if ((nums[3][3].equals("S ")) && (nums[2][3].equals("O ")) && (nums[1][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[1][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[3][1].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("20")) {
-                    if ((nums[3][4].equals("S ")) && (nums[2][4].equals("O ")) && (nums[1][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][4].equals("S ")) && (nums[2][3].equals("O ")) && (nums[1][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][4].equals("S ")) && (nums[3][3].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("21")) {
-                    if ((nums[4][0].equals("S ")) && (nums[3][0].equals("O ")) && (nums[2][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][0].equals("S ")) && (nums[4][1].equals("O ")) && (nums[4][2].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("22")) {
-                    if ((nums[4][1].equals("S ")) && (nums[3][1].equals("O ")) && (nums[2][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][1].equals("S ")) && (nums[4][2].equals("O ")) && (nums[4][3].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("23")) {
-                    if ((nums[4][2].equals("S ")) && (nums[4][1].equals("O ")) && (nums[4][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][2].equals("S ")) && (nums[3][1].equals("O ")) && (nums[2][0].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][2].equals("S ")) && (nums[3][2].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[2][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][2].equals("S ")) && (nums[4][3].equals("O ")) && (nums[4][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("24")) {
-                    if ((nums[4][3].equals("S ")) && (nums[4][2].equals("O ")) && (nums[4][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[2][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][3].equals("S ")) && (nums[3][3].equals("O ")) && (nums[2][3].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("25")) {
-                    if ((nums[4][4].equals("S ")) && (nums[4][3].equals("O ")) && (nums[4][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][4].equals("S ")) && (nums[3][3].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[4][4].equals("S ")) && (nums[3][4].equals("O ")) && (nums[2][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-
-            }
-
-            if (letterChoice.equals("O")) {
-
-                if (numChoice.equals("02")) {
-                    if ((nums[0][0].equals("S ")) && (nums[0][1].equals("O ")) && (nums[0][2].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("03")) {
-                    if ((nums[0][1].equals("S ")) && (nums[0][2].equals("O ")) && (nums[0][3].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("04")) {
-                    if ((nums[0][2].equals("S ")) && (nums[0][3].equals("O ")) && (nums[0][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-
-                if (numChoice.equals("06")) {
-                    if ((nums[0][0].equals("S ")) && (nums[1][0].equals("O ")) && (nums[2][0].equals("S "))) {
-                        xScore++;
-                    }
-                }
-
-                if (numChoice.equals("07")) {
-                    if ((nums[1][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[1][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][1].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[0][2].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("08")) {
-                    if ((nums[0][2].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[1][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][3].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][1].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("09")) {
-                    if ((nums[0][3].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[1][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][4].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("10")) {
-                    if ((nums[0][4].equals("S ")) && (nums[1][4].equals("O ")) && (nums[2][4].equals("S "))) {
-                        xScore++;
-                    }
-
-                }
-                if (numChoice.equals("11")) {
-                    if ((nums[1][0].equals("S ")) && (nums[2][0].equals("O ")) && (nums[3][0].equals("S "))) {
-                        xScore++;
-                    }
-
-                }
-                if (numChoice.equals("12")) {
-                    if ((nums[1][1].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][0].equals("S "))) {
-                        xScore++;
-                    }
-
-                }
-
-                if (numChoice.equals("13")) {
-                    if ((nums[1][2].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][1].equals("S "))) {
-                        xScore++;
-                    }
-
-                }
-                if (numChoice.equals("14")) {
-                    if ((nums[1][3].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[2][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][4].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("15")) {
-
-                    if ((nums[1][4].equals("S ")) && (nums[2][4].equals("O ")) && (nums[3][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("16")) {
-
-                    if ((nums[2][0].equals("S ")) && (nums[3][0].equals("O ")) && (nums[4][0].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("17")) {
-                    if ((nums[2][1].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[3][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("18")) {
-                    if ((nums[2][2].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][2].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[3][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][1].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("19")) {
-                    if ((nums[2][3].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][3].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][4].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][2].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("20")) {
-                    if ((nums[2][4].equals("S ")) && (nums[3][4].equals("O ")) && (nums[4][4].equals("S "))) {
-                        xScore++;
-                    }
-
-                }
-
-                if (numChoice.equals("22")) {
-                    if ((nums[4][0].equals("S ")) && (nums[4][1].equals("O ")) && (nums[4][2].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("23")) {
-                    if ((nums[4][1].equals("S ")) && (nums[4][2].equals("O ")) && (nums[4][3].equals("S "))) {
-                        xScore++;
-                    }
-                }
-                if (numChoice.equals("24")) {
-                    if ((nums[4][2].equals("S ")) && (nums[4][3].equals("O ")) && (nums[4][4].equals("S "))) {
-                        xScore++;
-                    }
-                }
-
-            }
-            if (holdx == xScore) {
-                flagX = 1;
-            } else if (holdx > xScore) {
-                flagX = 0;
-            }
-
-        }
-
-        if (chosenTurn == 1) {
-            int holdy = yScore;
-            if (letterChoice.equals("S")) {
-                if (numChoice.equals("01")) {
-                    if ((nums[0][0].equals("S ")) && (nums[0][1].equals("O ")) && (nums[0][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][0].equals("S ")) && (nums[1][0].equals("O ")) && (nums[2][0].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("02")) {
-                    if ((nums[0][1].equals("S ")) && (nums[0][2].equals("O ")) && (nums[0][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][1].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][1].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("03")) {
-                    if ((nums[0][2].equals("S ")) && (nums[1][2].equals("O ")) && (nums[1][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[0][3].equals("O ")) && (nums[0][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[0][1].equals("O ")) && (nums[0][0].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("04")) {
-                    if ((nums[0][3].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][3].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][3].equals("S ")) && (nums[0][2].equals("O ")) && (nums[0][1].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("05")) {
-                    if ((nums[0][4].equals("S ")) && (nums[0][3].equals("O ")) && (nums[0][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][4].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][4].equals("S ")) && (nums[1][4].equals("O ")) && (nums[2][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("06")) {
-                    if ((nums[1][0].equals("S ")) && (nums[2][0].equals("O ")) && (nums[3][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[1][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("07")) {
-                    if ((nums[1][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[1][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][1].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][3].equals("S "))) {
-                        yScore++;
-                    }
-                }
-
-                if (numChoice.equals("08")) {
-                    if ((nums[1][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[1][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[1][1].equals("O ")) && (nums[1][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("09")) {
-                    if ((nums[1][3].equals("S ")) && (nums[1][2].equals("O ")) && (nums[1][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][3].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][3].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("10")) {
-                    if ((nums[1][4].equals("S ")) && (nums[2][4].equals("O ")) && (nums[3][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][4].equals("S ")) && (nums[1][3].equals("O ")) && (nums[1][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][4].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("11")) {
-                    if ((nums[2][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[0][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[1][0].equals("O ")) && (nums[0][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[3][0].equals("O ")) && (nums[4][0].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("12")) {
-                    if ((nums[2][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[0][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[1][1].equals("O ")) && (nums[0][1].equals("S "))) {
-                        xScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][3].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("13")) {
-                    if ((nums[2][2].equals("S ")) && (nums[1][1].equals("O ")) && (nums[0][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[1][2].equals("O ")) && (nums[0][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[0][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("14")) {
-                    if ((nums[2][3].equals("S ")) && (nums[1][3].equals("O ")) && (nums[0][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[1][2].equals("O ")) && (nums[0][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[2][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][3].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("15")) {
-                    if ((nums[2][4].equals("S ")) && (nums[1][4].equals("O ")) && (nums[0][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[1][3].equals("O ")) && (nums[0][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[2][3].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[3][4].equals("O ")) && (nums[4][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("16")) {
-                    if ((nums[3][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[1][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][0].equals("S ")) && (nums[2][0].equals("O ")) && (nums[1][0].equals("S "))) {
-                        yScore++;
-                    }
-                }
-
-                if (numChoice.equals("17")) {
-                    if ((nums[3][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[3][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[1][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][1].equals("S ")) && (nums[2][1].equals("O ")) && (nums[1][1].equals("S "))) {
-                        yScore++;
-                    }
-
-                }
-                if (numChoice.equals("18")) {
-                    if ((nums[3][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[3][1].equals("O ")) && (nums[3][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[2][2].equals("O ")) && (nums[1][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[1][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[2][1].equals("O ")) && (nums[1][0].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("19")) {
-                    if ((nums[3][3].equals("S ")) && (nums[2][3].equals("O ")) && (nums[1][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[1][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[3][1].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("19")) {
-                    if ((nums[3][3].equals("S ")) && (nums[2][3].equals("O ")) && (nums[1][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[1][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[3][1].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("20")) {
-                    if ((nums[3][4].equals("S ")) && (nums[2][4].equals("O ")) && (nums[1][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][4].equals("S ")) && (nums[2][3].equals("O ")) && (nums[1][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][4].equals("S ")) && (nums[3][3].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("21")) {
-                    if ((nums[4][0].equals("S ")) && (nums[3][0].equals("O ")) && (nums[2][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][0].equals("S ")) && (nums[4][1].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("22")) {
-                    if ((nums[4][1].equals("S ")) && (nums[3][1].equals("O ")) && (nums[2][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][1].equals("S ")) && (nums[4][2].equals("O ")) && (nums[4][3].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("23")) {
-                    if ((nums[4][2].equals("S ")) && (nums[4][1].equals("O ")) && (nums[4][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][2].equals("S ")) && (nums[3][1].equals("O ")) && (nums[2][0].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][2].equals("S ")) && (nums[3][2].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[2][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][2].equals("S ")) && (nums[4][3].equals("O ")) && (nums[4][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("24")) {
-                    if ((nums[4][3].equals("S ")) && (nums[4][2].equals("O ")) && (nums[4][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[2][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][3].equals("S ")) && (nums[3][3].equals("O ")) && (nums[2][3].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("25")) {
-                    if ((nums[4][4].equals("S ")) && (nums[4][3].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][4].equals("S ")) && (nums[3][3].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[4][4].equals("S ")) && (nums[3][4].equals("O ")) && (nums[2][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-
-            }
-            if (letterChoice.equals("O")) {
-
-                if (numChoice.equals("02")) {
-                    if ((nums[0][0].equals("S ")) && (nums[0][1].equals("O ")) && (nums[0][2].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("03")) {
-                    if ((nums[0][1].equals("S ")) && (nums[0][2].equals("O ")) && (nums[0][3].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("04")) {
-                    if ((nums[0][2].equals("S ")) && (nums[0][3].equals("O ")) && (nums[0][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-
-                if (numChoice.equals("06")) {
-                    if ((nums[0][0].equals("S ")) && (nums[1][0].equals("O ")) && (nums[2][0].equals("S "))) {
-                        yScore++;
-                    }
-                }
-
-                if (numChoice.equals("07")) {
-                    if ((nums[1][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[1][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][1].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[1][1].equals("O ")) && (nums[1][2].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("08")) {
-                    if ((nums[0][2].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[1][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][1].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][3].equals("S ")) && (nums[1][2].equals("O ")) && (nums[2][1].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("09")) {
-                    if ((nums[0][3].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[1][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][4].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[0][2].equals("S ")) && (nums[1][3].equals("O ")) && (nums[2][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("10")) {
-                    if ((nums[0][4].equals("S ")) && (nums[1][4].equals("O ")) && (nums[2][4].equals("S "))) {
-                        yScore++;
-                    }
-
-                }
-                if (numChoice.equals("11")) {
-                    if ((nums[1][0].equals("S ")) && (nums[2][0].equals("O ")) && (nums[3][0].equals("S "))) {
-                        yScore++;
-                    }
-
-                }
-                if (numChoice.equals("12")) {
-                    if ((nums[1][1].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[2][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][0].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][1].equals("O ")) && (nums[3][0].equals("S "))) {
-                        yScore++;
-                    }
-
-                }
-
-                if (numChoice.equals("13")) {
-                    if ((nums[1][2].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[2][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][1].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][3].equals("S ")) && (nums[2][2].equals("O ")) && (nums[3][1].equals("S "))) {
-                        yScore++;
-                    }
-
-                }
-                if (numChoice.equals("14")) {
-                    if ((nums[1][3].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[2][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][4].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("15")) {
-
-                    if ((nums[1][4].equals("S ")) && (nums[2][4].equals("O ")) && (nums[3][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("16")) {
-
-                    if ((nums[2][0].equals("S ")) && (nums[3][0].equals("O ")) && (nums[4][0].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("17")) {
-                    if ((nums[2][1].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][1].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[3][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][0].equals("S ")) && (nums[3][1].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[1][2].equals("S ")) && (nums[2][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("18")) {
-                    if ((nums[2][2].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[3][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][1].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][3].equals("S ")) && (nums[3][2].equals("O ")) && (nums[4][1].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("19")) {
-                    if ((nums[2][3].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][3].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[3][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[3][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][2].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][4].equals("S "))) {
-                        yScore++;
-                    }
-                    if ((nums[2][4].equals("S ")) && (nums[3][3].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("20")) {
-                    if ((nums[2][4].equals("S ")) && (nums[3][4].equals("O ")) && (nums[4][4].equals("S "))) {
-                        yScore++;
-                    }
-
-                }
-
-                if (numChoice.equals("22")) {
-                    if ((nums[4][0].equals("S ")) && (nums[4][1].equals("O ")) && (nums[4][2].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("23")) {
-                    if ((nums[4][1].equals("S ")) && (nums[4][2].equals("O ")) && (nums[4][3].equals("S "))) {
-                        yScore++;
-                    }
-                }
-                if (numChoice.equals("24")) {
-                    if ((nums[4][2].equals("S ")) && (nums[4][3].equals("O ")) && (nums[4][4].equals("S "))) {
-                        yScore++;
-                    }
-                }
-
-            }
-            if (holdy == yScore) {
-                flagY = 1;
-            } else if (holdy > yScore) {
-                flagY = 0;
-            }
-
-        }
-
-    }
-
 }
